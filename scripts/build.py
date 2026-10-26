@@ -175,8 +175,8 @@ def whoami(t):
         kv("ahora:", s("IA en aplicaciones móviles")),
         kv("enfoque:", arr("proyectos con IA", "apps móviles", "aplicaciones")),
         kv("lidero:", arr("Aura Nova", "Aliada", "Vitalify")),
-        kv("craft:", s("UX Design · centrado en el usuario")),
-        kv("metodología:", arr("Scrum", "Agile")),
+        kv("especialidad:", arr("apps móviles", "UX Design", "arquitecturas", "Scrum")),
+        kv("ia:", s("uso responsable · ética · sesgos · legal")),
         kv("equipo:", s("Co-founder @ MindaCode")),
         kv("base:", s("Lima, Perú")),
         kv("disponible:", [("true", "purple")], last=True),
@@ -201,27 +201,27 @@ def whoami(t):
 
 # ─────────────────────────── ESCUDERÍAS (proyectos que lidero) ───────────────────────────
 LEADS = [
-    ("01", "Aura Nova", "E-commerce oficial de Aura Nova, tienda de detalles. Desarrollo y lidero la plataforma.",
+    ("01", "Aura Nova", "LÍDER", "E-commerce oficial de Aura Nova, tienda de detalles. Desarrollo y lidero la plataforma.",
      ["e-commerce", "negocio"], "purple"),
-    ("02", "Aliada", "Lidero el desarrollo del proyecto y coordino al equipo de punta a punta.",
-     ["liderazgo", "equipo"], "green"),
-    ("03", "Vitalify", "Salud digital: monitoreo de signos vitales. Lidero el desarrollo.",
+    ("02", "Aliada", "CO-CREADOR · LÍDER", "App de seguridad para universitarias: alarma que avisa a personas cercanas "
+     "con tu ubicación y LumAI, asistente confidencial.", ["seguridad", "LumAI"], "green"),
+    ("03", "Vitalify", "LÍDER", "Salud digital: monitoreo de signos vitales. Lidero el desarrollo.",
      ["salud", "IoT"], "red"),
 ]
 
 
 def leads(t):
-    c = PALETTE[t]; W, H = 900, 250; cw, gap = 284, 24
+    c = PALETTE[t]; W, H = 900, 270; cw, gap = 284, 24
     body = []
-    for i, (num, name, desc, tags, col) in enumerate(LEADS):
+    for i, (num, name, role, desc, tags, col) in enumerate(LEADS):
         x = i * (cw + gap)
         b = [card(cw, H - 2, c, 14, x, 1),
              f'<path d="M{x+14} 1.5h{cw-28}" stroke="{c[col]}" stroke-width="3"/>',
              f'<text x="{x+22}" y="62" class="disp" font-size="46" font-weight="900" font-style="italic" fill="{c[col]}">{num}</text>']
-        p, pw = pill(c, 0, 26, "LÍDER")
+        p, pw = pill(c, 0, 26, role)
         b.append(f'<g transform="translate({x + cw - 22 - pw:.1f} 0)">{p}</g>')
         b.append(f'<text x="{x+22}" y="104" class="disp" font-size="27" font-weight="700" fill="{c["text"]}">{escape(name)}</text>')
-        for j, line in enumerate(wrap(desc, 33)[:3]):
+        for j, line in enumerate(wrap(desc, 34)[:4]):
             b.append(f'<text x="{x+22}" y="{134+j*20}" class="sans" font-size="14" fill="{c["muted"]}">{escape(line)}</text>')
         b.append(tags_row(c, x + 22, H - 46, tags, col))
         body.append(f'<g class="in" style="animation-delay:{.1+i*.15:.2f}s">{"".join(b)}</g>')
@@ -233,11 +233,11 @@ def leads(t):
 STACK = [
     ("lenguajes", ["Dart", "TypeScript", "JavaScript", "Java", "C#", "SQL"]),
     ("mobile",    ["Flutter", "Android", "iOS"]),
-    ("ia",        ["LLMs en apps", "APIs de IA", "prompt engineering"]),
+    ("ia",        ["IA generativa", "prompt engineering", "IA responsable"]),
     ("web",       ["React", "Next.js", "Spring Boot", "ASP.NET Core"]),
     ("datos",     ["PostgreSQL", "Supabase"]),
     ("ux / ui",   ["Figma", "UX Design", "prototipado"]),
-    ("método",    ["Scrum", "Agile", "Git"]),
+    ("método",    ["Scrum", "gestión de equipos", "Git"]),
     ("extra",     ["Docker", "ESP32", "Unity"]),
 ]
 TYRES = ["red", "yellow", "text", "green", "blue"]  # blando · medio · duro · intermedio · lluvia
@@ -268,12 +268,48 @@ def stack(t):
     save("stack", t, svg(W, H, "".join(body), "Stack tecnológico de Maykol (setup del monoplaza)"))
 
 
+# ─────────────────────────── TEMAS DE FORMACIÓN ───────────────────────────
+TOPICS = [
+    ("IA ética y sesgos en IA", "IA RESPONSABLE", "purple"),
+    ("Aspectos legales de la IA", "IA RESPONSABLE", "purple"),
+    ("Big Data y ciencia de datos", "DATOS", "blue"),
+    ("IA generativa y prompt engineering", "IA GENERATIVA", "red"),
+    ("Scrum", "AGILE", "green"),
+]
+
+
+def topics(t):
+    """temas.log como una torre de tiempos: posición, color de categoría y tema."""
+    c = PALETTE[t]; W = 900; y0, step = 72, 46
+    H = y0 + step * len(TOPICS) + 62
+    body = [card(W, H, c, 16),
+            f'<g class="in"><text x="32" y="46" class="mono" font-size="15">'
+            f'{spans([("maykol", "red"), ("@", "muted"), ("pitwall", "text"), ("   temas.log", "muted")], c)}</text></g>',
+            f'<text x="{W-70}" y="46" text-anchor="end" class="disp" font-size="13" font-weight="700" letter-spacing="2" fill="{c["muted"]}">FORMACIÓN</text>',
+            stripes(c, W - 28, 33)]
+    for i, (topic, cat, col) in enumerate(TOPICS):
+        y = y0 + i * step
+        p, pw = pill(c, 0, y + 5, cat, col, fs=11, solid=False)
+        body.append(f'<g class="in" style="animation-delay:{.15+i*.1:.2f}s">'
+                    f'<rect x="28" y="{y}" width="{W-56}" height="34" rx="8" fill="{c["surface2"]}"/>'
+                    f'<text x="52" y="{y+23}" text-anchor="middle" class="disp" font-size="17" font-weight="900" font-style="italic" fill="{c["text"]}">{i+1:02d}</text>'
+                    f'<path d="M78 {y+7}v20" stroke="{c[col]}" stroke-width="4"/>'
+                    f'<text x="96" y="{y+23}" class="disp" font-size="18" font-weight="700" fill="{c["text"]}">{escape(topic)}</text>'
+                    f'<g transform="translate({W - 38 - pw:.1f} 0)">{p}</g></g>')
+    fy = H - 24
+    body.append(f'<path d="M24 {fy-26}h{W-48}" stroke="{c["border"]}" stroke-dasharray="3 5"/>')
+    body.append(f'<g class="in" style="animation-delay:.8s"><text x="32" y="{fy}" class="mono" font-size="13.5">'
+                f'{spans([("$ ", "red"), ("tail -f temas.log", "text"), ("   ·   enfoque: ", "muted"), ("IA responsable", "purple")], c)}'
+                f'<tspan class="caret" fill="{c["red"]}"> ▍</tspan></text></g>')
+    save("topics", t, svg(W, H, "".join(body), "Temas de formación: " + ", ".join(tp for tp, _, _ in TOPICS)))
+
+
 # ─────────────────────────── TELEMETRÍA (radares) ───────────────────────────
 # Puntajes 0-100: ajústalos a tu criterio.
 RADARS = {
     "radar-skills": ("telemetry --skills", "habilidades", [
-        ("IA aplicada", 78), ("Mobile", 88), ("UX Design", 84),
-        ("Liderazgo", 85), ("Backend", 78), ("Scrum", 82)]),
+        ("IA generativa", 78), ("Mobile", 88), ("UX Design", 84),
+        ("Liderazgo", 85), ("Arquitectura", 78), ("Scrum", 82)]),
     "radar-langs": ("telemetry --langs", "lenguajes", [
         ("Dart", 70), ("TypeScript", 80), ("JavaScript", 85),
         ("Java", 75), ("C#", 75), ("SQL", 78)]),
@@ -364,7 +400,7 @@ def finish(t):
 # ─────────────────────────── BUILD ───────────────────────────
 if __name__ == "__main__":
     for t in PALETTE:
-        whoami(t); leads(t); stack(t); finish(t)  # el banner lo genera scripts/banner/generate.py
+        whoami(t); leads(t); stack(t); topics(t); finish(t)  # el banner lo genera scripts/banner/generate.py
         for r in RADARS: radar(t, r)
         for i, p in enumerate(PROJECTS): project(t, i, *p)
     print(f"SVGs generados en {OUT}")

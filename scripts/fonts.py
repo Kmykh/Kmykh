@@ -25,7 +25,7 @@ def font_css(svg_body: str, weights=(700, 900)) -> str:
     chars = "".join(sorted(set(text) | {" "}))
     css = []
     for w in weights:
-        font = TTFont(DIR / FILES[w])
+        font = TTFont(DIR / FILES[w], recalcTimestamp=False)  # mismo SVG en cada build
         opts = subset.Options()
         opts.flavor = "woff2"
         opts.drop_tables += ["FFTM"]
