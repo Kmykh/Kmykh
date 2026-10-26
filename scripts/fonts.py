@@ -19,6 +19,18 @@ FAMILY = "TW"
 STACK = f"{FAMILY},'Titillium Web',Inter,'Segoe UI',-apple-system,Helvetica,Arial,sans-serif"
 
 
+_metrics = {}
+
+
+def text_width(text: str, size: float, weight=700) -> float:
+    """Ancho real del texto en px con Titillium Web (para alinear sin adivinar)."""
+    if weight not in _metrics:
+        font = TTFont(DIR / FILES[weight])
+        _metrics[weight] = (font.getBestCmap(), font["hmtx"].metrics, font["head"].unitsPerEm)
+    cmap, hmtx, upm = _metrics[weight]
+    return sum(hmtx[cmap[ord(ch)]][0] if ord(ch) in cmap else upm / 2 for ch in text) * size / upm
+
+
 def font_css(svg_body: str, weights=(700, 900)) -> str:
     """@font-face con solo los glifos presentes en el texto del SVG."""
     text = html.unescape(re.sub(r"<style.*?</style>|<[^>]+>", " ", svg_body, flags=re.S))

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Contribuciones de GitHub como una carrera: un monoplaza recorre el calendario
-del último año semana por semana (en zigzag, con horquillas) y va encendiendo
-los días con actividad hasta cruzar la bandera a cuadros.
+Contribuciones de GitHub animadas: un auto recorre el calendario del último
+año semana por semana (en zigzag) y va encendiendo los días con actividad
+hasta llegar a "hoy".
 
 La ejecuta .github/workflows/race.yml cada 12 horas y publica race-dark.svg /
 race-light.svg en la rama `output`.
@@ -20,7 +20,7 @@ from datetime import date
 from pathlib import Path
 from xml.sax.saxutils import escape
 
-from build import PALETTE, spans, stripes, svg
+from build import PALETTE, spans, svg
 
 USER = os.environ.get("GITHUB_USER", "Kmykh")
 OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / "dist"
@@ -28,21 +28,21 @@ OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().paren
 QUERY = """query($login: String!) { user(login: $login) { contributionsCollection { contributionCalendar {
   totalContributions weeks { contributionDays { date contributionCount contributionLevel weekday } } } } } }"""
 
-LEVELS = {  # asfalto → rojo de carrera
-    "dark": ["#1c1c23", "#4d1712", "#8f1f15", "#d42a1c", "#ff5236"],
-    "light": ["#ebebf0", "#ffcdc6", "#ff8f7f", "#e8412b", "#b01a0d"],
+LEVELS = {  # sin actividad → mucha actividad (verdes de la marca)
+    "dark": ["#172019", "#0f4a2a", "#127a3b", "#1fae4f", "#3ddc6f"],
+    "light": ["#edf2ee", "#bfe6cb", "#7ccb97", "#34a35c", "#17733c"],
 }
 LEVEL_INDEX = {"NONE": 0, "FIRST_QUARTILE": 1, "SECOND_QUARTILE": 2, "THIRD_QUARTILE": 3, "FOURTH_QUARTILE": 4}
 EXTRA = {
-    "dark": {"track": "#15151b", "tyre": "#62626e", "flash": "#ffe066", "check": "#f3f3f6"},
-    "light": {"track": "#f3f3f6", "tyre": "#26262e", "flash": "#ffb800", "check": "#111116"},
+    "dark": {"track": "#141a16", "tyre": "#5d6a62", "flash": "#ffb36b"},
+    "light": {"track": "#f4f8f5", "tyre": "#2a3530", "flash": "#f59e4c"},
 }
 MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
 
 W, H = 900, 300
 P, CELL = 14, 11                   # paso de la grilla y tamaño de cada día
 X0, Y0 = 93, 150                   # esquina de la grilla
-SPEED, LEAD, HOLD = 280, .8, 4.0   # px/s del monoplaza, espera en la salida y pausa en la meta
+SPEED, LEAD, HOLD = 280, .8, 4.0   # px/s del auto, espera al inicio y pausa al llegar a hoy
 
 
 def fetch():
@@ -82,7 +82,7 @@ def cy(row): return Y0 + row * P + CELL / 2
 
 
 def track(cols):
-    """Zigzag por las columnas: baja, horquilla, sube… y termina sobre la meta (columna extra)."""
+    """Zigzag por las columnas: baja, gira, sube… y termina en la columna de "hoy"."""
     r = P / 2
     d = [f"M{cx(0):.1f} {cy(0) - P:.1f}"]
     for col in range(cols):
@@ -99,16 +99,16 @@ def dist_to(col, row):
 
 
 def car(c, e):
-    """Monoplaza visto desde arriba, apuntando hacia +x (animateMotion lo rota)."""
+    """Auto visto desde arriba, apuntando hacia +x (animateMotion lo rota)."""
     return (f'<g filter="url(#glow)" transform="scale(1.3)">'
-            f'<rect x="-12.5" y="-6" width="3" height="12" rx="1" fill="{c["red"]}"/>'
+            f'<rect x="-12.5" y="-6" width="3" height="12" rx="1" fill="{c["orange"]}"/>'
             f'<rect x="-10" y="-7" width="5.5" height="3.2" rx="1" fill="{e["tyre"]}"/>'
             f'<rect x="-10" y="3.8" width="5.5" height="3.2" rx="1" fill="{e["tyre"]}"/>'
             f'<rect x="4" y="-6.5" width="4.5" height="2.8" rx="1" fill="{e["tyre"]}"/>'
             f'<rect x="4" y="3.7" width="4.5" height="2.8" rx="1" fill="{e["tyre"]}"/>'
-            f'<path d="M-10-2.4L-5-3.8H1.5L9-1.2L12.5 0L9 1.2L1.5 3.8H-5L-10 2.4Z" fill="{c["red"]}"/>'
+            f'<path d="M-10-2.4L-5-3.8H1.5L9-1.2L12.5 0L9 1.2L1.5 3.8H-5L-10 2.4Z" fill="{c["orange"]}"/>'
             f'<circle cx="0" cy="0" r="1.5" fill="{e["tyre"]}"/>'
-            f'<rect x="10.5" y="-5.5" width="2.5" height="11" rx="1" fill="{c["red"]}"/></g>')
+            f'<rect x="10.5" y="-5.5" width="2.5" height="11" rx="1" fill="{c["orange"]}"/></g>')
 
 
 def render(theme, cal):
@@ -123,22 +123,18 @@ def render(theme, cal):
     k = lambda s: f"{max(0.0, min(1.0, s / T)):.4f}"
 
     b = [f'<defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%">'
-         f'<feDropShadow dx="0" dy="0" stdDeviation="1.4" flood-color="{c["red"]}" flood-opacity=".5"/></filter>'
-         f'<pattern id="chk" width="6" height="6" patternUnits="userSpaceOnUse">'
-         f'<rect width="6" height="6" fill="{c["surface"]}"/><rect width="3" height="3" fill="{e["check"]}"/>'
-         f'<rect x="3" y="3" width="3" height="3" fill="{e["check"]}"/></pattern></defs>',
+         f'<feDropShadow dx="0" dy="0" stdDeviation="1.4" flood-color="{c["orange"]}" flood-opacity=".5"/></filter></defs>',
          f'<rect x=".5" y=".5" width="{W-1}" height="{H-1}" rx="16" fill="{c["surface"]}" stroke="{c["border"]}"/>',
-         f'<text x="28" y="38" class="mono" font-size="14">{spans([("$ ", "red"), ("git log --laps", "text")], c)}</text>',
-         f'<text x="{W-70}" y="38" text-anchor="end" class="disp" font-size="13" font-weight="700" letter-spacing="2" '
-         f'fill="{c["muted"]}">TEMPORADA {days[0]["date"][:4]}–{days[-1]["date"][2:4]}</text>',
-         stripes(c, W - 28, 25)]
+         f'<text x="28" y="38" class="mono" font-size="14">{spans([("$ ", "orange"), ("git log ", "muted"), ("--since=1.year", "text")], c)}</text>',
+         f'<text x="{W-28}" y="38" text-anchor="end" class="mono" font-size="12.5" fill="{c["muted"]}">'
+         f'{days[0]["date"][:7]} → {days[-1]["date"][:7]}</text>']
 
-    # tiempos: como la torre de tiempos de la transmisión
+    # cifras del año
     bd = date.fromisoformat(best["date"])
-    tiles = [("CONTRIBUCIONES", f'{cal["totalContributions"]}', "último año", "red"),
-             ("VUELTA RÁPIDA", f'{best["contributionCount"]}', f"mejor día · {bd.day} {MESES[bd.month - 1]}", "purple"),
-             ("RACHA MÁX", f"{longest}", seguidos(longest), "green"),
-             ("RACHA ACTUAL", f"{current}", seguidos(current), "yellow")]
+    tiles = [("CONTRIBUCIONES", f'{cal["totalContributions"]}', "último año", "green"),
+             ("MEJOR DÍA", f'{best["contributionCount"]}', f"{bd.day} {MESES[bd.month - 1]} {bd.year}", "orange"),
+             ("RACHA MÁXIMA", f"{longest}", seguidos(longest), "green"),
+             ("RACHA ACTUAL", f"{current}", seguidos(current), "orange")]
     tw = (W - 56 - 3 * 12) / 4
     for i, (label, val, unit, col) in enumerate(tiles):
         x = 28 + i * (tw + 12)
@@ -146,8 +142,8 @@ def render(theme, cal):
                  f'<rect x="{x:.1f}" y="56" width="{tw:.1f}" height="54" rx="8" fill="{c["surface2"]}" stroke="{c["border"]}"/>'
                  f'<path d="M{x + 1.5:.1f} 64v38" stroke="{c[col]}" stroke-width="3"/>'
                  f'<text x="{x + 16:.1f}" y="75" class="mono" font-size="10" letter-spacing="1.5" fill="{c["muted"]}">{label}</text>'
-                 f'<text x="{x + 15:.1f}" y="100" class="disp" font-size="24" font-weight="900" font-style="italic" fill="{c["text"]}">{val}'
-                 f'<tspan dx="8" class="mono" font-size="11" font-weight="400" font-style="normal" fill="{c["muted"]}">{escape(unit)}</tspan></text></g>')
+                 f'<text x="{x + 15:.1f}" y="100" class="disp" font-size="24" font-weight="700" fill="{c["text"]}">{val}'
+                 f'<tspan dx="8" class="mono" font-size="11" font-weight="400" fill="{c["muted"]}">{escape(unit)}</tspan></text></g>')
 
     # meses y días
     last = -9
@@ -159,9 +155,11 @@ def render(theme, cal):
     for row, name in [(1, "lun"), (3, "mié"), (5, "vie")]:
         b.append(f'<text x="{X0 - 10}" y="{cy(row) + 4:.1f}" text-anchor="end" class="mono" font-size="10.5" fill="{c["muted"]}">{name}</text>')
 
-    # circuito, meta y días
+    # recorrido, marcador de hoy y días
     b.append(f'<path d="{path}" fill="none" stroke="{e["track"]}" stroke-width="{P + 4}" stroke-linejoin="round"/>')
-    b.append(f'<rect x="{X0 + cols * P:.1f}" y="{Y0 - 2}" width="{CELL}" height="{7 * P}" fill="url(#chk)" stroke="{c["border"]}"/>')
+    hx = X0 + cols * P + CELL / 2
+    b.append(f'<path d="M{hx:.1f} {Y0}V{Y0 + 7 * P - 3}" stroke="{c["orange"]}" stroke-width="2" stroke-dasharray="2 4" stroke-linecap="round"/>'
+             f'<text x="{hx:.1f}" y="{Y0 - 16}" text-anchor="middle" class="mono" font-size="11" fill="{c["orange"]}">hoy</text>')
     for col, w in enumerate(weeks):
         for d in w["contributionDays"]:
             row, lvl = d["weekday"], LEVEL_INDEX[d["contributionLevel"]]
@@ -176,7 +174,7 @@ def render(theme, cal):
                      f'<animate attributeName="fill" dur="{T:.2f}s" repeatCount="indefinite" keyTimes="{kt}" '
                      f'values="{lv[0]};{lv[0]};{e["flash"]};{lv[lvl]};{lv[lvl]};{lv[0]}"/></rect>')
 
-    # monoplaza
+    # auto
     end = LEAD + sweep
     b.append(f'<g opacity="0">{car(c, e)}'
              f'<animateMotion dur="{T:.2f}s" repeatCount="indefinite" rotate="auto" calcMode="linear" '
@@ -187,13 +185,13 @@ def render(theme, cal):
     # pie
     fy = H - 22
     b.append(f'<text x="28" y="{fy}" class="mono" font-size="11.5" fill="{c["muted"]}">'
-             f'actualizado {days[-1]["date"]} · cada vuelta = una semana</text>')
+             f'actualizado {days[-1]["date"]} · cada columna es una semana</text>')
     lx = W - 28 - 5 * 15 - 36
     b.append(f'<text x="{lx - 8}" y="{fy}" text-anchor="end" class="mono" font-size="11.5" fill="{c["muted"]}">menos</text>')
     for i, col in enumerate(lv):
         b.append(f'<rect x="{lx + i * 15}" y="{fy - 10}" width="{CELL}" height="{CELL}" rx="2.5" fill="{col}"/>')
     b.append(f'<text x="{W - 28}" y="{fy}" text-anchor="end" class="mono" font-size="11.5" fill="{c["muted"]}">más</text>')
-    return svg(W, H, "".join(b), f"Contribuciones de {USER} en el último año: un monoplaza recorre el calendario")
+    return svg(W, H, "".join(b), f"Contribuciones de {USER} en el último año: un auto recorre el calendario y enciende los días con actividad")
 
 
 def main():
