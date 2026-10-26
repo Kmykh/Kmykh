@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="168" viewBox="0 0 440 168" xml:space="preserve" role="img" aria-label="Proyecto VideoGame-MaskInThePit"><style>
+.sans{font-family:Inter,'Segoe UI',-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif} .mono{font-family:'JetBrains Mono','SF Mono',Menlo,Consolas,'Liberation Mono',monospace}
+.in{animation:in .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.caret{animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style><g class="in" style="animation-delay:0.50s"><rect x=".5" y=".5" width="439" height="167" rx="14" fill="#121815" stroke="#243029"/><text x="24" y="42" class="sans" font-size="18" font-weight="650" fill="#eef3ef">VideoGame-MaskInThePit</text><text x="416" y="42" text-anchor="end" class="sans" font-size="18" fill="#f97316">↗</text><text x="24" y="74" class="sans" font-size="14" fill="#8b968f">Videojuego 2D sobre la locura como estrés.</text><text x="24" y="95" class="sans" font-size="14" fill="#8b968f">Capítulo 1.</text><rect x="24" y="124" width="48.8" height="24" rx="12" fill="#18201b" stroke="#243029"/><circle cx="37" cy="136" r="4" fill="#22c55e"/><text x="47" y="140.5" class="mono" font-size="12" fill="#eef3ef">C#</text><rect x="80.8" y="124" width="59.0" height="24" rx="12" fill="#18201b" stroke="#243029"/><text x="91.8" y="140.5" class="mono" font-size="12" fill="#8b968f">Unity</text></g></svg>
